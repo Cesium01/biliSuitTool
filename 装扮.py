@@ -10,14 +10,12 @@ import qrcode
 import re
 
 appVersionCode = '6560300'
-item_id = input('输入装扮编号（购买页面分享链接后面的数字）：')
 add_month, buy_num = '', ''
 csrf = ''
 s = requests.session()
 s.headers = {
     'Host': 'api.bilibili.com',
     'DNT': '1',
-    'Referer': 'https://www.bilibili.com/h5/mall/suit/detail?navhide=1&id='+item_id,
     'Accept-Encoding': 'gzip',
     'Content-Type': 'application/json',
     'User-Agent': 'Mozilla/5.0(Linux;Android 11) BiliApp/'+appVersionCode+' mobi_app/android network/2 os/android',
@@ -84,6 +82,20 @@ def read_cookies():
         requests.utils.cookiejar_from_dict(cookies_dict, cookiejar=s.cookies)
         return True
 
+def get_userinfo():
+    res = s.get('https://api.bilibili.com/x/web-interface/nav',timeout=9).json()
+    if not res['code']:
+        print(res['data']['uname']+'(uid:'+res['data']['mid']+')已登录')
+    else:
+        print('获取用户信息失败：'+json.dumps(res))
+
+def get_suitinfo():
+    res = s.get('https://api.bilibili.com/x/garb/mall/item/suit/v2?item_id='+item_id, timeout=9).json()
+    if not res['code']:
+        print('装扮：'+res['data']['item']['name'])
+    else:
+        print('获取装扮信息失败：'+json.dumps(res))
+
 def get_coupon():
     # TODO: 优惠券token处理，无券可用时data为null
     res = s.get('https://api.bilibili.com/x/garb/coupon/usable?item_id='+item_id, timeout=9)
@@ -133,7 +145,11 @@ if __name__ == '__main__':
     if not read_cookies() and not login():
         print('登录失败')
     else:
+        get_userinfo()
         csrf = s.cookies.get('bili_jct')
+        item_id = input('输入装扮编号（购买页面分享链接后面的数字）：')
+        s.headers['Referer'] = 'https://www.bilibili.com/h5/mall/suit/detail?navhide=1&id='+item_id
         add_month = input('购买月份（默认-1，为永久）：') or '-1'
         buy_num = input('购买数量（默认1份，仅部分永久装扮支持多份）：') or '1'
+        get_suitinfo()
         create()
