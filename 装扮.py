@@ -85,6 +85,7 @@ def read_cookies():
         return True
 
 def get_coupon():
+    # TODO: 优惠券token处理，无券可用时data为null
     res = s.get('https://api.bilibili.com/x/garb/coupon/usable?item_id='+item_id, timeout=9)
     print(res.text)
     return json.loads(res.text)['data']
@@ -122,6 +123,7 @@ def pay(data):
     result = res.json()
     if not result['errno']:
         pay_data = result['data']['payChannelParam']
+        # 调试断点请打在此处，一旦完成下方的请求就扣钱了
         res2 = requests.post(result['data']['payChannelUrl'], headers=headers, data=pay_data.encode('utf-8'), timeout=9)
         print(res2.text)
     else:
