@@ -85,7 +85,7 @@ def read_cookies():
 def get_userinfo():
     res = s.get('https://api.bilibili.com/x/web-interface/nav',timeout=9).json()
     if not res['code']:
-        print(res['data']['uname']+'(uid:'+res['data']['mid']+')已登录')
+        print(res['data']['uname']+'(uid:'+str(res['data']['mid'])+')已登录')
     else:
         print('获取用户信息失败：'+json.dumps(res))
 
